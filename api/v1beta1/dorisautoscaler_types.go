@@ -18,8 +18,10 @@ package v1beta1
 
 import (
 	acv2 "k8s.io/api/autoscaling/v2"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	vpav1 "k8s.io/autoscaler/vertical-pod-autoscaler/pkg/apis/autoscaling.k8s.io/v1"
 )
 
 // DorisAutoscaler is the Schema for the Doris cluster autoscaling API
@@ -47,11 +49,14 @@ type DorisAutoscalerList struct {
 type DorisAutoscalerSpec struct {
 	// name of the target DorisCluster
 	// +kubebuilder:validation:Required
-	Cluster string            `json:"cluster"`
-	CN      *CNAutoscalerSpec `json:"cn,omitempty"`
+	Cluster string                 `json:"cluster"`
+	CN      *CNAutoscalerSpec      `json:"cn,omitempty"`
+	FE      *DorisComponentVPASpec `json:"fe,omitempty"`
+	BE      *DorisComponentVPASpec `json:"be,omitempty"`
+	Broker  *DorisComponentVPASpec `json:"broker,omitempty"`
 }
 
-// CNAutoscalerSpec contains autoscaling details of CN components.
+// CNAutoscalerSpec contains horizontal autoscaling details of CN components.
 type CNAutoscalerSpec struct {
 	// The range of replicas for automatic scaling
 	Replicas ReplicasRange `json:"replicas,omitempty"`
@@ -96,11 +101,30 @@ type ScalePeriodSeconds struct {
 	ScaleDown *int32 `json:"scaleDown,omitempty"`
 }
 
+// DorisComponentVPASpec defines the VPA details of Doris components
+type DorisComponentVPASpec struct {
+	// Specifies the minimal amount of resources that will be recommended for the pod container.
+	// +optional
+	MinAllowed corev1.ResourceList `json:"minAllowed,omitempty"`
+
+	// Specifies the minimal amount of resources that will be recommended for the pod container.
+	// +optional
+	MaxAllowed corev1.ResourceList `json:"maxAllowed,omitempty"`
+
+	// Controls when autoscaler applies changes to the pod resources.
+	// The default is 'Auto'.
+	// +optional
+	UpdateMode *vpav1.UpdateMode `json:"updateMode,omitempty"`
+}
+
 // DorisAutoscalerStatus defines the observed state of DorisAutoscaler
 type DorisAutoscalerStatus struct {
-	LastApplySpecHash *string            `json:"lastApplySpecHash,omitempty"`
-	ClusterRef        NamespacedName     `json:"clusterRef,omitempty"`
-	CN                CNAutoscalerStatus `json:"cn,omitempty"`
+	LastApplySpecHash *string                     `json:"lastApplySpecHash,omitempty"`
+	ClusterRef        NamespacedName              `json:"clusterRef,omitempty"`
+	CN                CNAutoscalerStatus          `json:"cn,omitempty"`
+	FE                DorisComponentVPASyncStatus `json:"fe,omitempty"`
+	BE                DorisComponentVPASyncStatus `json:"be,omitempty"`
+	Broker            DorisComponentVPASyncStatus `json:"broker,omitempty"`
 }
 
 // CNAutoscalerStatus defines the observed state of CN autoscaler
@@ -119,6 +143,11 @@ type CNAutoscalerSyncStatus struct {
 	ScaleUpStatus   *acv2.HorizontalPodAutoscalerStatus `json:"scaleUpHpaStatus,omitempty"`
 	ScaleDownHpaRef *AutoScalerRef                      `json:"scaleDown,omitempty"`
 	ScaleDownStatus *acv2.HorizontalPodAutoscalerStatus `json:"scaleDownHpaStatus,omitempty"`
+}
+
+type DorisComponentVPASyncStatus struct {
+	VpaRef    *AutoScalerRef                     `json:"vpaRef,omitempty"`
+	VpaStatus *vpav1.VerticalPodAutoscalerStatus `json:"vpaStatus,omitempty"`
 }
 
 // AutoScaleRecPhase is the current reconciling state of autoscaler

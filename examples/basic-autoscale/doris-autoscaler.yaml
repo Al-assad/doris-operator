@@ -14,6 +14,7 @@ spec:
   #   scaleUp: 60
   #   scaleDown: 60
 
+  # CN HPA
   cn:
     # The maximum and minimum CN replicas of automatic scaling.
     replicas:
@@ -37,4 +38,36 @@ spec:
         max: 80
         min: 20
 
+  # FE VPA
+  # Ref: https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler
+  fe:
+    minAllowed:
+      cpu: 1
+      memory: 2Gi
+    maxAllowed:
+      cpu: 1
+      memory: 2Gi
+    updateMode: Auto
+    # vpaSpec: {}
 
+  # BE VPA
+  be:
+    minAllowed:
+      cpu: 1
+      memory: 2Gi
+    maxAllowed:
+      cpu: 1
+      memory: 2Gi
+    updateMode: Auto
+    # vpaSpec: {}
+
+  # Broker VPA
+  broker:
+    minAllowed:
+      cpu: 1
+      memory: 2Gi
+    maxAllowed:
+      cpu: 1
+      memory: 2Gi
+    updateMode: Auto
+    # vpaSpec: {}
