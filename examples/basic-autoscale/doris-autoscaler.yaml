@@ -48,7 +48,6 @@ spec:
       cpu: 1
       memory: 2Gi
     updateMode: Auto
-    # vpaSpec: {}
 
   # BE VPA
   be:
@@ -59,7 +58,6 @@ spec:
       cpu: 1
       memory: 2Gi
     updateMode: Auto
-    # vpaSpec: {}
 
   # Broker VPA
   broker:
@@ -70,4 +68,3 @@ spec:
       cpu: 1
       memory: 2Gi
     updateMode: Auto
-    # vpaSpec: {}
